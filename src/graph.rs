@@ -76,11 +76,12 @@ mod tests {
     }
 
     #[test]
-    fn test_from_file_basic() {
-        let result = from_file("tests/edges_basic.txt");
-        assert!(result.is_ok());
+    fn test_from_file_correct() {
+        // Basic example. All is right
+        let basic = from_file("tests/edges_basic.txt");
+        assert!(basic.is_ok());
         
-        let g = result.unwrap();
+        let g = basic.unwrap();
         assert_eq!(g["a"]["b"], 3);
         assert_eq!(g["a"]["b"], 3);
         
@@ -89,26 +90,23 @@ mod tests {
 
         assert_eq!(g["b"]["c"], 1);
         assert_eq!(g["c"]["b"], 1);
-    }
-    
-    #[test]
-    fn test_from_file_duplicate() {
-        let result = from_file("tests/edges_duplicate.txt");
-        assert!(result.is_ok());
 
-        let g = result.unwrap();
+        // Duplicate example. Multiple definitions
+        let duplicates = from_file("tests/edges_duplicate.txt");
+        assert!(duplicates.is_ok());
+
+        let g = duplicates.unwrap();
         assert_eq!(g["a"]["b"], 3);
         assert_eq!(g["b"]["a"], 3);
     }
-
+    
     #[test]
     fn test_from_file_invalid() {
-        let result = from_file("tests/edges_invalid_weight.txt");
-        assert!(result.is_err());
-    }
+        // Example with a non usize weight 
+        let invalid_weight = from_file("tests/edges_invalid_weight.txt");
+        assert!(invalid_weight.is_err());
 
-    #[test]
-    fn test_from_file_invalid_no_weight() {
+        // Example without an edge weight (a -> b) = ?
         let result = from_file("tests/edges_invalid_no_weight.txt");
         assert!(result.is_err());
     }
