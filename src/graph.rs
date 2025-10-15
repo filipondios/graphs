@@ -1,11 +1,47 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BinaryHeap};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
+use std::cmp::Reverse;
 
 // Graph represented as an adjacency map <a -> [b, c, ...]>
 // An edge is represented as graph[a] = <b, weight> 
 type Graph = HashMap<String, HashMap<String, usize>>;
 
+
+pub fn dijkstra_binheap(graph: &Graph, src: &str)
+    -> (HashMap<String, usize>, HashMap<String, Option<String>>) {
+
+    let mut q: BinaryHeap<(Reverse<usize>, String)> = BinaryHeap::new();
+    let mut dist: HashMap<String, usize> = HashMap::new();
+    let mut prev: HashMap<String, Option<String>> = HashMap::new();
+
+    graph.keys().for_each(|vertex| {
+        dist.insert(vertex.clone(), std::usize::MAX);
+        prev.insert(vertex.clone(), None);
+    });
+
+    dist.insert(src.to_string(), 0);
+    q.push((Reverse(0), src.to_string()));
+
+    while let Some((Reverse(d), a)) = q.pop() {
+        if d > dist[&a] {
+            continue;
+        }
+
+        if let Some(neighbors) = graph.get(&a) {
+            for (b, &weight) in neighbors {
+                let alt = d + weight;
+
+                if alt < dist[b] {
+                    dist.insert(b.clone(), alt);
+                    prev.insert(b.clone(), Some(a.clone()));
+                    q.push((Reverse(alt), b.clone()));
+                }
+            }
+        }
+    }
+    (dist, prev)
+}
 
 pub fn from_list(edge_list: &[(&str, &str, usize)]) -> Graph {
     let mut graph = Graph::new();
@@ -78,7 +114,7 @@ mod tests {
     #[test]
     fn test_from_file_correct() {
         // Basic example. All is right
-        let basic = from_file("tests/edges_basic.txt");
+        let basic = from_file("tests/basic");
         assert!(basic.is_ok());
         
         let g = basic.unwrap();
@@ -92,7 +128,7 @@ mod tests {
         assert_eq!(g["c"]["b"], 1);
 
         // Duplicate example. Multiple definitions
-        let duplicates = from_file("tests/edges_duplicate.txt");
+        let duplicates = from_file("tests/duplicates");
         assert!(duplicates.is_ok());
 
         let g = duplicates.unwrap();
@@ -103,11 +139,11 @@ mod tests {
     #[test]
     fn test_from_file_invalid() {
         // Example with a non usize weight 
-        let invalid_weight = from_file("tests/edges_invalid_weight.txt");
+        let invalid_weight = from_file("tests/bad_weight");
         assert!(invalid_weight.is_err());
 
         // Example without an edge weight (a -> b) = ?
-        let result = from_file("tests/edges_invalid_no_weight.txt");
+        let result = from_file("tests/no_weight");
         assert!(result.is_err());
     }
 }
