@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <hash_map.h>
+#include <errors.h>
 
 #define MAP_DEF_CAPACITY 16
 #define REHASH_THRESHOLD 0.75f

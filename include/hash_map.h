@@ -7,8 +7,6 @@
 extern "C" {
 #endif
 
-enum { ERR_INPUT, ERR_ALLOC, ERR_NONE };
-
 typedef struct hash_map hash_map;
 struct hash_map { size_t capacity; size_t count; void* entries; };
 

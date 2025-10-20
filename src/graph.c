@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <graph.h>
+#include <errors.h>
 
 int graph_read_edges(hash_map* map, const edge* edges, size_t num_edges) {
     if (!map) { return ERR_INPUT; }
