@@ -4,7 +4,7 @@
 #include <errors.h>
 
 #define MAP_DEF_CAPACITY 16
-#define REHASH_THRESHOLD 0.7f
+#define REHASH_THRESHOLD(count, capacity) (count * 10 >= capacity * 7)
 
 hash_map* map_create(size_t entry_size, size_t capacity) {
     if (!entry_size) { return NULL; }
@@ -57,52 +57,45 @@ inline int map_ensure_capacity(hash_map* map, size_t entry_size) {
     return ERR_NONE;
 }
 
+
 void* map_get_entry(hash_map* map, size_t key, size_t entry_size, size_t value_size) {   
     const size_t idx = size_t_hash(key) % map->capacity;
-    const void* base = map->entries;
+    const unsigned char* base = (const unsigned char*) map->entries;
     
-    for (size_t i = 0; i < map->count; ++i) {
+    for (size_t i = 0; i < map->capacity; ++i) {
         const size_t pos = (idx + i) % map->capacity;
-        const void* entry = base + (entry_size * pos);
+        const unsigned char* entry = base + (entry_size * pos);
         
-        unsigned char entry_used = *((unsigned char*)
+        const unsigned char entry_used = *((unsigned char*)
             (entry + sizeof(size_t) + value_size));
-        size_t entry_key = *((size_t*)entry);
-
-        if (entry_key == key || !entry_used) {
-            // empty or existent entry <key, ?>
-            return (void*)entry;
-        }
+        if (!entry_used) { return (void*)entry; }
+        
+        const size_t entry_key = *((size_t*)entry);
+        if (key == entry_key) { return (void*)entry; }
     }
     return NULL;
 }
 
 void* map_get_or_create_entry(hash_map* map, size_t key, size_t entry_size, size_t value_size) {
-    void* entry = map_get_entry(map, key, entry_size, value_size);
+    unsigned char* entry = map_get_entry(map, key, entry_size, value_size);
     
     unsigned char* used_ptr = (unsigned char*)
         (entry + sizeof(size_t) + value_size);
     size_t* key_ptr = (size_t*)entry;
 
     if (!*used_ptr) {
-        if ((float)map->count / (float)map->capacity >= REHASH_THRESHOLD) {
-            // rehash the hash_map and then insert
+        if (REHASH_THRESHOLD(map->count, map->capacity)) {
+            // rehash the hash_map and then insert <key, ?> 
             int code = map_ensure_capacity(map, entry_size);
             if (code == ERR_ALLOC) { return NULL; }
 
-            void* empty_entry = map_get_entry(map, key, entry_size, value_size);
-            used_ptr = (unsigned char*)(empty_entry + sizeof(size_t) + value_size);
-            key_ptr = (size_t*) empty_entry;
-
-            *used_ptr = 1;
-            *key_ptr = key;
-            entry = empty_entry;
-        } else {
-            // use existent entry
-            *key_ptr = key;
-            *used_ptr = 1;
-            ++map->count;
-        }
+            entry = map_get_entry(map, key, entry_size, value_size);
+            used_ptr = (unsigned char*)(entry + sizeof(size_t) + value_size);
+            key_ptr = (size_t*) entry;
+        }       
+        *key_ptr = key;
+        *used_ptr = 1;
+        ++map->count;
     }
     return (void*)entry;
 }
