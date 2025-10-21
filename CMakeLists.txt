@@ -14,6 +14,14 @@ target_include_directories(graphs_lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  message(STATUS "Target architecture: 64-bit")
+  add_compile_definitions(BUILD_64BIT=1)
+else()
+  message(STATUS "Target architecture: 32-bit")
+  add_compile_definitions(BUILD_32BIT=1)
+endif()
+
 if (MSVC)
   add_compile_options(/W4 /permissive-)
 else()
