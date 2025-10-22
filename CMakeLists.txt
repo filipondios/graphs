@@ -11,8 +11,12 @@ set_target_properties(graphs_lib PROPERTIES
   OUTPUT_NAME graphs POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(graphs_lib PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib>
   $<INSTALL_INTERFACE:include>)
+
+add_subdirectory(submodules/check)
+enable_testing()
+add_subdirectory(test)
 
 if (CMAKE_SIZEOF_VOID_P EQUAL 8)
   message(STATUS "Target architecture: 64-bit")
