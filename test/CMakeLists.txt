@@ -1,0 +1,5 @@
+file(GLOB_RECURSE SOURCES "*.c")
+add_executable(graphs_tests ${SOURCES})
+target_include_directories(graphs_tests PRIVATE ../src)
+target_link_libraries(graphs_tests PRIVATE graphs_lib check)
+add_test(NAME graphs_tests COMMAND graphs_tests)
