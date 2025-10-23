@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-enum errors { ERR_NONE, ERR_ALLOC, ERR_INPUT };
+enum errors { ERR_NONE, ERR_ALLOC };
 
 #ifdef __cplusplus
 }
