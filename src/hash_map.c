@@ -46,13 +46,13 @@ void map_destroy(hash_map* map) {
 }
 
 size_t size_t_hash(size_t n) {
-    #ifdef BUILD_64BIT
+    #if defined(BUILD_64BIT)
     // 64-bit version (SplitMix64)
     n += 0x9e3779b97f4a7c15ULL;
     n = (n ^ (n >> 30)) * 0xbf58476d1ce4e5b9ULL;
     n = (n ^ (n >> 27)) * 0x94d049bb133111ebULL;
     return n ^ (n >> 31);        
-    #elifdef BUILD_32BIT
+    #elif defined(BUILD_32BIT)
     // 32-bit version (Knuth)
     return n * 2654435761u;
     #else
