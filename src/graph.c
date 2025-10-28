@@ -17,6 +17,7 @@ int graph_load_edges(hash_map* map, const char* file_path) {
     FILE* file = fopen(file_path, "r");
     if (!file) { return ERR_IO; }
 
+    // TODO change this buffer sizes
     char us[64], vs[64], ws[64];
     char line[192];
 
