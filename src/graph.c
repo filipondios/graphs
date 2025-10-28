@@ -1,4 +1,5 @@
-#include "hash_map.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <graph.h>
 #include <errors.h>
 
@@ -13,6 +14,27 @@ int graph_read_edges(hash_map* map, const edge* edges, size_t num_edges) {
 }
 
 int graph_load_edges(hash_map* map, const char* file_path) {
+    FILE* file = fopen(file_path, "r");
+    if (!file) { return ERR_IO; }
+
+    char us[64], vs[64], ws[64];
+    char line[192];
+
+    while (fgets(line, sizeof(line), file)) {
+        if ((sscanf(line, "%63s %63s %63s", us, vs, ws) == 3)) {
+            // obtain the vertices and weight values
+            const size_t u = (size_t) strtoull(us, NULL, 10);
+            const size_t v = (size_t) strtoull(vs, NULL, 10);
+            const size_t w = (size_t) strtoull(ws, NULL, 10);
+
+            // Create the connections (u -> v) & (v -> u) so (u <-> v)
+            const int ruv = graph_add_connection(map, u, v, w);
+            const int rvu = graph_add_connection(map, v, u, w);
+            if (ruv == ERR_ALLOC || rvu == ERR_ALLOC) { return ERR_ALLOC; }
+        } else { return ERR_IO; }
+    }    
+
+    fclose(file);    
     return ERR_NONE;
 }
 
